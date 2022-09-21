@@ -1,6 +1,6 @@
 # Feature Block Topology Search Based on Differentiable Neural Architecture Search for Multimodal MRI Brain Tumor Segmentation
 
-This repository is the work of "AFeature Block Topology Search Based on Differentiable Neural Architecture Search for Multimodal MRI Brain Tumor Segmentation" based on **pytorch** implementation. 
+This repository is the work of "Feature Block Topology Search Based on Differentiable Neural Architecture Search for Multimodal MRI Brain Tumor Segmentation" based on **pytorch** implementation. 
 
 
 ## Requirements
