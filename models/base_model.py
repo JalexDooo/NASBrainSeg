@@ -135,6 +135,8 @@ class BaseModel(nn.Module):
                 for k, v in state_dict.items():
                     if k[:7] == 'modules' and 'cpu' in self.device:
                         name = k[7:]
+                    elif k[:6] == 'module' and len(self.gpu_ids)==1:
+                        name = k[7:]
                     else:
                         name = k
                     new_state_dict[name] = v
@@ -257,10 +259,7 @@ def get_scheduler(optimizer, conf):
         def lambda_rule(epoch):
             # lr_l = np.power(1-(epoch/(conf.train_epoch+conf.train_epoch_decay)),0.9)
             lr_l = np.power(0.97, epoch)
-            if lr_l >= 1e-6:
-                return lr_l
-            else:
-                return 1e-6
+            return lr_l
         scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_rule)
     elif conf.lr_policy == 'step':
         scheduler = lr_scheduler.StepLR(optimizer, step_size=conf.lr_decay_iters, gamma=0.2)
@@ -298,13 +297,17 @@ def expand_target(x, n_class,mode='softmax'):
     shape = tuple(shape)
     xx = torch.zeros(shape)
     if mode.lower() == 'softmax':
-        xx[:,1,:,:,:] = (x == 1)
-        xx[:,2,:,:,:] = (x == 2)
-        xx[:,3,:,:,:] = (x == 3)
+        for i in range(n_class-1):
+            xx[:, i+1, ...] = (x==i+1)
+        # xx[:,1,:,:,:] = (x == 1)
+        # xx[:,2,:,:,:] = (x == 2)
+        # xx[:,3,:,:,:] = (x == 3)
     if mode.lower() == 'sigmoid':
-        xx[:,0,:,:,:] = (x == 1)
-        xx[:,1,:,:,:] = (x == 2)
-        xx[:,2,:,:,:] = (x == 3)
+        for i in range(n_class):
+            xx[:, i, ...] = (x==i)
+        # xx[:,0,:,:,:] = (x == 1)
+        # xx[:,1,:,:,:] = (x == 2)
+        # xx[:,2,:,:,:] = (x == 3)
     return xx.to(x.device)
 
 def flatten(tensor):

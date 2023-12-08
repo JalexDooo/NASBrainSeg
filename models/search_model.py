@@ -134,11 +134,11 @@ class SearchNet(BaseModel):
 
         self.model_names = ['Search']
 
-        self.netSearch = define_net(4, 4, 'bn', 8, 3, init_type='kaiming', gpu_ids=self.gpu_ids)
+        self.netSearch = define_net(1, 14, 'bn', 8, 3, init_type='kaiming', gpu_ids=self.gpu_ids)
 
         if self.isTrain:
-            self.criterion = GeneralizedDiceLoss
-            # self.criterion = torch.nn.CrossEntropyLoss()
+            # self.criterion = GeneralizedDiceLoss
+            self.criterion = torch.nn.CrossEntropyLoss()
             self.optimizer = torch.optim.Adam(self.netSearch.parameters(), lr=cfg.lr, betas=(0.9, 0.999))
             self.optimizers.append(self.optimizer)
     

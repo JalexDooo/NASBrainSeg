@@ -122,8 +122,8 @@ class Edge(nn.Module):
         res = self.skip_connection(x)
         head = self.head(x)
         midConv = self.midConv(head)
-        midAtt = self.midAtt(head, midConv)
-        last = self.last(midConv+midAtt)
+        # midAtt = self.midAtt(head, midConv)
+        last = self.last(midConv) # +midAtt)
         output = last + res
         ret = self.dir(output)
 

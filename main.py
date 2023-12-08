@@ -398,19 +398,44 @@ def tttt():
         print(epoch, lr)
         # wget http://www.clamav.net/downloads/production/clamav-0.105.0.tar.gz
 
-def model_test(**kwargs):
+# python3 main.py model_flops_params_caltime --model='liu2023_adhdc'
+def model_flops_params_caltime(**kwargs): # 192, 192, 48
+    import time
     cfg = config.cfg
     cfg._parse(kwargs)
+    cfg.des = 'high'
     
     cfg.isTrain = True
     cfg.train_batch = int(len(cfg.gpu_ids)*2)
 
     cfg.net_arch, cfg.net_arch_dir = get_architecture()
-    model = getattr(models, 'SuperNet')(net_arch=cfg.net_arch, net_arch_dir=cfg.net_arch_dir)
+    model = getattr(models, cfg.model)(net_arch=cfg.net_arch, net_arch_dir=cfg.net_arch_dir)
+    # model = getattr(models, cfg.model)(cfg)
+    model.eval()
 
-    a = torch.Tensor(np.random.randn(2, 4, 64, 64, 64))
-    b = model(a)
-    print(b.shape)
+    # 3D
+    a = torch.Tensor(np.random.randn(1, 4, 192, 192, 48))
+    # a = torch.Tensor(np.random.randn(1, 4, 128, 128, 128))
+
+    # 3D
+    # val_dataset = Multi(cfg, is_train=False)
+    # val_dataloader = DataLoader(val_dataset, batch_size=cfg.search_batch, shuffle=True, num_workers=0, pin_memory=True, drop_last=True)
+    # for a in val_dataloader:
+    #     a = a
+    #     break
+
+    # 2D
+    # a = torch.Tensor(np.random.randn(1, 4, 192, 192))
+    st = time.time()
+    # b = model(a)
+    
+    from thop import profile
+    from thop import clever_format
+    flops, params = profile(model, inputs=(a,))
+    flops, params = clever_format([flops, params], '%.3f')
+    print('flops & params: {}, {}'.format(flops, params))
+    end = time.time()
+    print('TIME: ', end-st) # 2D need multiply 48
 
 if __name__ == "__main__":
     import fire

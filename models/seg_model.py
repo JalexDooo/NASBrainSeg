@@ -1,8 +1,9 @@
 import os
 import torch
 import torch.nn as nn
-from models.base_model import BaseModel, init_net, get_norm_layer, GeneralizedDiceLoss
+from models.base_model import BaseModel, init_net, get_norm_layer, GeneralizedDiceLoss, expand_target
 from models.edge import Edge, ConvBlock
+from monai.losses import DiceCELoss, DiceLoss
 
 # path = [1, 1, 0, 0, 1, 1, 2, 2]
 # path_dir = [-1, 0, 1, 0, -1, 0, -1, 0] # -1:down, 0:same, 1:up
@@ -58,7 +59,7 @@ class SuperNet(nn.Module):
 
         self.last = nn.Sequential(
             ConvBlock(self._channels[0], out_channel, norm=norm),
-            nn.Softmax(dim=1),
+            # nn.Softmax(dim=1),
         )
 
     def forward(self, x):
@@ -99,17 +100,20 @@ class SegNet(BaseModel):
         self._net_arch = cfg.net_arch
         self._net_arch_dir = cfg.net_arch_dir
 
-        self.netSeg = define_net(4, 4, 'sync_bn', self._net_arch, self._net_arch_dir, init_type='kaiming', gpu_ids=self.gpu_ids)
+        self.netSeg = define_net(1, 14, 'sync_bn', self._net_arch, self._net_arch_dir, init_type='kaiming', gpu_ids=self.gpu_ids)
 
         if self.isTrain:
-            self.criterion = GeneralizedDiceLoss
+            # self.criterion = GeneralizedDiceLoss
             # self.criterion = torch.nn.CrossEntropyLoss()
+            self.criterion = DiceCELoss(to_onehot_y=False, softmax=True, squared_pred=True)
             self.optimizer = torch.optim.Adam(self.netSeg.parameters(), lr=cfg.lr, betas=(0.9, 0.999))
             self.optimizers.append(self.optimizer)
                     
     def set_input(self, input):
         self.img = input['img'].to(self.device)
         self.label = input['label'].to(self.device)
+        self.label = expand_target(self.label, n_class=14, mode='sigmoid')
+        # print('shape:,,,,', self.img.shape, self.label.shape)
     
     def forward(self):
         self.pred = self.netSeg(self.img)

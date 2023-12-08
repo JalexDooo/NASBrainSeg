@@ -47,6 +47,12 @@ cd /sunjindong/NASBraSeg && python -u main.py val --gpu_ids=[0] --task='val' --l
 ```
 Then make a submission to the online evaluation server.
 
+### Calculation Flops, Prams and Prediction time
+
+```
+python3 main.py model_flops_params_caltime --model='liu2023_adhdc'
+```
+
 ## Citation
 
 If you use our code or model in your work or find it is helpful, please cite the paper:
