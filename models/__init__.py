@@ -19,3 +19,5 @@ from .raza2023 import raza2023 # 3D open
 from .chang2023 import chang2023 # 3D
 from .ayadi2023 import ayadi2023 # 3D
 from .liu2023_ADHDCNet import liu2023_adhdc # 3D open
+
+from .Akshya2023 import Akshya2023 # 2D
